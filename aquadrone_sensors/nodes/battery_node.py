@@ -14,6 +14,7 @@ R2 = 28.7e3
 
 
 class MCP342x_Test:
+    # Prints
     def __init__(self, addr, channel, resolution, scale_factor):
         self.ident = (addr, channel, resolution)
         self.scale = scale_factor
@@ -28,8 +29,9 @@ class MCP342x_Test:
 
 
 class BatteryPack:
-    def __init__(self, bus, addr, topic):
-        self.pub = rospy.Publisher(topic, BatteryState, queue_size=10)
+    def __init__(self, bus, addr, name):
+        self.pub = rospy.Publisher(name, BatteryState, queue_size=10)
+        self.name = name
         self.volts_raw = [0.0] * 8
         self.volt_sensors = []
         for j in range(4):
@@ -64,6 +66,10 @@ class BatteryPack:
     
         msg.voltage = self.voltage()
         msg.cell_voltage = self.cell_voltages()
+        msg.serial_number = self.name
+        
+        if isinstance(self.volt_sensors[0], MCP342x_Test):
+            msg.serial_number += "-FAKE"
         
         self.pub.publish(msg)
     
